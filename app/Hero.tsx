@@ -1,8 +1,10 @@
 'use client';
+import { withBasePath } from '@/lib/base-path';
 /* oxlint-disable next/no-img-element -- Local Figma assets retain their native dimensions inside scaled artboards. */
 import { useEffect, useRef } from 'react';
 
 import ShaderLensBlur, { DARK_COLORS } from './ShaderLensBlur';
+import {Composer} from './ui-blocks/Primitives';
 import { useLanguage } from './Language';
 export function Downloads({
   onDownload,
@@ -141,7 +143,7 @@ export function Hero({ onDownload }: { onDownload: (os: string) => void }) {
   return (
     <section id="overview" className="hero" ref={root}>
       <div className="login-background">
-        <img src="/assets/login-bg.jpg" alt="" />
+        <img src={withBasePath("/assets/login-bg.jpg")} alt="" />
         <div />
       </div>
       <ShaderLensBlur className="login-shader" colors={DARK_COLORS} />
@@ -178,7 +180,7 @@ export function Hero({ onDownload }: { onDownload: (os: string) => void }) {
               ...depth(Number(dx), Number(dy), Number(dz)),
             }}
           >
-            <img src={`/assets/${img}.jpg`} alt="" />
+            <img src={`${withBasePath('/assets/')}${img}.jpg`} alt="" />
           </div>
         ))}
         <div
@@ -192,7 +194,7 @@ export function Hero({ onDownload }: { onDownload: (os: string) => void }) {
           }}
         >
           <img
-            src="/assets/imgImageFrame.jpg"
+            src={withBasePath("/assets/imgImageFrame.jpg")}
             alt={t(
               '花海中的石质建筑概念',
               'Stone architecture surrounded by wildflowers',
@@ -213,7 +215,7 @@ export function Hero({ onDownload }: { onDownload: (os: string) => void }) {
               ...depth(dx, dy, dz),
             }}
           >
-            <img src={`/assets/skill-${img}.webp`} alt="" />
+            <img src={`${withBasePath('/assets/')}skill-${img}.webp`} alt="" />
             <span>{t(zh, en)}</span>
           </a>
         ))}
@@ -228,7 +230,7 @@ export function Hero({ onDownload }: { onDownload: (os: string) => void }) {
           }}
         >
           <img
-            src="/assets/imgImgVillaGarden3.jpg"
+            src={withBasePath("/assets/imgImgVillaGarden3.jpg")}
             alt={t('设计平面图', 'Design floor plan')}
           />
           <span>{t('平面方案', 'View Plan')}</span>
@@ -244,7 +246,7 @@ export function Hero({ onDownload }: { onDownload: (os: string) => void }) {
           }}
         >
           <img
-            src="/assets/imgImgVillaGarden4.jpg"
+            src={withBasePath("/assets/imgImgVillaGarden4.jpg")}
             alt={t('自然采光的室内设计', 'Daylit interior design')}
           />
           <div>
@@ -265,7 +267,7 @@ export function Hero({ onDownload }: { onDownload: (os: string) => void }) {
           }}
         >
           <img
-            src="/assets/figma147/hero-garden.webp"
+            src={withBasePath("/assets/figma147/hero-garden.webp")}
             alt={t('别墅花园', 'Villa garden')}
           />
           <div>
@@ -275,28 +277,7 @@ export function Hero({ onDownload }: { onDownload: (os: string) => void }) {
             </span>
           </div>
         </a>
-        <a
-          className="float-card hero-prompt"
-          href="#canvas"
-          style={{
-            left: '34.4%',
-            top: '72%',
-            width: '31.25%',
-            ...depth(0, 170, 130),
-          }}
-        >
-          <div>
-            <span>/{t('演示文稿', 'Slides')}</span>{' '}
-            {t(
-              '生成一份设计策划演示稿',
-              'Generate a design planning presentation',
-            )}
-          </div>
-          <footer>
-            <span>＋</span>
-            <span>↑</span>
-          </footer>
-        </a>
+        <div className="float-card hero-prompt" style={{left:'34.4%',top:'72%',width:'31.25%',...depth(0,170,130)}}><Composer showFooter={false} initialValue={t('生成一份商业空间设计策划演示稿','Create a commercial space design presentation')}/></div>
         <div
           className="float-card prompt-card"
           style={{

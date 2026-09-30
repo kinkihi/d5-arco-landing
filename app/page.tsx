@@ -1,4 +1,5 @@
 'use client';
+import { withBasePath } from '@/lib/base-path';
 /* oxlint-disable next/no-img-element -- Local Figma assets retain their native dimensions inside scaled artboards. */
 import { useState } from 'react';
 import {
@@ -9,12 +10,11 @@ import {
 } from '@/components/ui/dialog';
 import { LanguageProvider, LanguageButtons, useLanguage } from './Language';
 import { Hero, Downloads } from './Hero';
-import { DesignGallery } from './DesignGallery';
+import { DesignStory } from './DesignStory';
 import {
-  PlanningBlock,
   PresentationBlock,
   CanvasBlock,
-  GenerationBlock,
+  WorkflowBlock,
 } from './ui-blocks/DesignBlocks';
 import {
   RenderBlock,
@@ -74,7 +74,7 @@ const footerGroups = [
 function Brand() {
   return (
     <a href="#overview" className="brand">
-      <img src="/assets/brand.webp" alt="" />
+      <img src={withBasePath("/assets/brand.webp")} alt="" />
       <span>D5</span>
     </a>
   );
@@ -83,41 +83,27 @@ function Page() {
   const { lang, t } = useLanguage();
   const [modal, setModal] = useState('');
   const panels = [
-    {
-      id: 'planning',
-      label: t('聊天策划', 'Chat planning'),
-      content: <PlanningBlock />,
-    },
-    {
-      id: 'presentation',
-      label: t('演示文稿', 'Presentation'),
-      content: <PresentationBlock />,
-    },
-    {
-      id: 'canvas',
-      label: t('画布编辑', 'Canvas editing'),
-      content: <CanvasBlock />,
-    },
-    {
-      id: 'generation',
-      label: t('图像生成', 'Image generation'),
-      content: <GenerationBlock />,
-    },
+    {id:'presentation',label:t('设计策划并即时编辑','Plan your design. Edit in place.'),description:t('从商业空间的设计策略，到可编辑的文档与演示文稿，让想法逐步成为完整提案。','Turn a commercial space strategy into editable documents and presentations, developing your ideas into a complete proposal.'),content:<PresentationBlock/>},
+    {id:'canvas',label:t('无限画布，无限预设','Infinite canvas. Endless presets.'),description:t('内置快捷技能，优化提示词，创建自定义预设，在同一画布中探索设计。','Explore design on one canvas with built-in skills, prompt refinement and your own presets.'),content:<CanvasBlock/>},
+    {id:'sharing',label:t('创作流分享','Share your creative workflow'),description:t('将图片、提示词与生成结果连接成创作流，分享灵感，让团队接续创作。','Connect images, prompts and results into a creative workflow. Share the inspiration so your team can build on it.'),content:<WorkflowBlock/>},
   ];
   const connections = [
     {
       id: 'render',
       label: t('Render 联动', 'Render connection'),
+      description:t('连接正在进行的 D5 Render 项目，让设计与实时场景保持同步。','Connect your active D5 Render project and keep design in sync with the live scene.'),
       content: <RenderBlock />,
     },
     {
       id: 'resources',
       label: t('云资源引用', 'Cloud resources'),
+      description:t('快捷引用场景、渲染记录、材质与素材，让项目资源随手可用。','Reference scenes, renders, materials and assets directly from your project.'),
       content: <ResourcesBlock />,
     },
     {
       id: 'transfer',
       label: t('场景迁移与批量操作', 'Scene transfer and batch operations'),
+      description:t('选择氛围、素材和材质，分步将设计意图应用到场景。','Choose atmosphere, assets and materials, then apply your design intent step by step.'),
       content: <TransferBlock />,
     },
   ];
@@ -139,7 +125,7 @@ function Page() {
       </header>
       <main>
         <Hero onDownload={setModal} />
-        <DesignGallery
+        <DesignStory
           id="canvas"
           title={t('和 Arco 一起设计', 'Design with Arco')}
           description={t(
@@ -149,7 +135,7 @@ function Page() {
           panels={panels}
         />
         <div className="connection-section">
-          <DesignGallery
+          <DesignStory
             id="chat"
             title={t('Arco 链接 D5', 'Arco connects to D5')}
             description={t(
@@ -173,7 +159,7 @@ function Page() {
           <CollaborationBlock onSales={() => setModal('sales')} />
         </section>
         <section className="closing" id="start">
-          <img src="/assets/brand.webp" alt="D5 Arco" />
+          <img src={withBasePath("/assets/brand.webp")} alt="D5 Arco" />
           <h2>
             {t('你的设计，', 'Where will your design')}
             <br />

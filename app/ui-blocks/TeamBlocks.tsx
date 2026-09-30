@@ -1,4 +1,5 @@
 'use client';
+import { withBasePath } from '@/lib/base-path';
 /* oxlint-disable next/no-img-element -- Local Figma assets retain their native dimensions inside scaled artboards. */
 import { useState } from 'react';
 import {
@@ -8,9 +9,12 @@ import {
   Check,
   ChevronDown,
 } from 'lucide-react';
+import {DropdownMenu,DropdownMenuTrigger,DropdownMenuContent,DropdownMenuItem} from '@/components/ui/dropdown-menu';
 import { useLanguage } from '../Language';
 import {
   Artboard,
+  Icon,
+  Composer,
   Toolbar,
   CanvasFooter,
   IconButton,
@@ -89,25 +93,7 @@ export function CollaborativeCanvas() {
           'Could we keep this planting arrangement?',
         )}
       </button>
-      {comment && (
-        <form
-          className="studio-comment-editor"
-          onSubmit={(e) => {
-            e.preventDefault();
-            setComment(false);
-          }}
-        >
-          <label>
-            {t('回复评论', 'Reply to comment')}
-            <textarea
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              placeholder={t('写下你的想法…', 'Share your thoughts…')}
-            />
-          </label>
-          <button type="submit">{t('保存在预览中', 'Save in preview')}</button>
-        </form>
-      )}
+      {comment&&<div className="studio-comment-editor"><Composer onSend={message=>{setNote(message);setComment(false);}}/></div>}
       {note && !comment && <span className="studio-comment-reply">{note}</span>}
       <CanvasFooter zoom={zoom} onZoom={setZoom} />
       {sharing && <Sharing onClose={() => setSharing(false)} />}
@@ -141,26 +127,17 @@ export function TeamProjects() {
       </nav>
       <div className="studio-project-folders">
         {titles.map((title, i) => (
-          <button
-            className="studio-folder-cover"
-            key={i}
-            aria-pressed={project === i}
-            onClick={() => setProject(project === i ? -1 : i)}
-          >
-            <img src={`/assets/ui/team-imgFile${i || ''}.webp`} alt="" />
-            <span className="studio-folder-glass" />
-            <strong>{title}</strong>
-            {project === i && (
-              <span className="studio-folder-selected">
-                <Check size={16} />
-                {tab
-                  ? t('团队共享', 'Shared with team')
-                  : t('个人项目', 'Personal project')}
-              </span>
-            )}
-          </button>
+          <div className="studio-folder" key={i}>
+            <button className="studio-folder-cover" aria-label={`${t('打开项目','Open project')} ${title}`} onClick={()=>setProject(i)}>
+              <span className="studio-folder-back"/><span className="studio-folder-sheet"/><img className="studio-folder-file" src={`${withBasePath('/assets/')}ui/team-imgFile${i||''}.webp`} alt=""/>
+              <span className="studio-folder-front" aria-hidden="true"><img src={`${withBasePath('/assets/')}ui/team-imgFile${i||''}.webp`} alt=""/></span>
+              <strong>{title}</strong><small className="studio-folder-date">{t('最后更新','Last updated')}<br/>{['Jan 26, 2026','Feb 14, 2026','Mar 3, 2026'][i]}</small>
+            </button>
+            <DropdownMenu><DropdownMenuTrigger className="studio-folder-more" aria-label={`${title} ${t('更多操作','more actions')}`}><Icon name="more" fallback={ChevronDown}/></DropdownMenuTrigger><DropdownMenuContent className="arco-menu"><DropdownMenuItem onClick={()=>setProject(i)}>{t('打开项目','Open project')}</DropdownMenuItem><DropdownMenuItem onClick={()=>setProject(i)}>{t('查看项目文件','View project files')}</DropdownMenuItem></DropdownMenuContent></DropdownMenu>
+          </div>
         ))}
       </div>
+      {project>=0&&<InlinePanel title={titles[project]} onClose={()=>setProject(-1)}><small>{tab?t('团队项目','Team project'):t('个人项目','Personal project')}</small><img src={`${withBasePath('/assets/')}ui/team-imgFile${project||''}.webp`} alt={titles[project]}/><p>{t('项目资料 · 概念方案 · 参考图片','Project brief · Concept design · Reference images')}</p></InlinePanel>}
     </section>
   );
 }
@@ -318,7 +295,7 @@ export function EcosystemCards({
             alt={t('D5 Lite 建筑模型', 'D5 Lite building model')}
           />
           <button onClick={() => onMore('D5 Lite')}>
-            <img src="/assets/brand.webp" alt="" />
+            <img src={withBasePath("/assets/brand.webp")} alt="" />
             {t('发送到 Arco', 'Send to Arco')}
           </button>
         </div>
@@ -347,7 +324,7 @@ export function EcosystemCards({
               aria-pressed={selected === i}
               onClick={() => setSelected(i)}
               style={{
-                backgroundImage: 'url(/assets/ui/ecosystem-img1.webp)',
+                backgroundImage: `url(${withBasePath("/assets/ui/ecosystem-img1.webp")})`,
                 backgroundSize: '600% 400%',
                 backgroundPosition: `${(i % 6) * 20}% ${(Math.floor(i / 6) * 100) / 3}%`,
               }}

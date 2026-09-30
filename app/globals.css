@@ -19,35 +19,35 @@
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url(/assets/figma147/fonts/font-0.ttf) format('truetype');
+  src: url(../public/assets/figma147/fonts/font-0.ttf) format('truetype');
 }
 @font-face {
   font-family: 'Inter';
   font-style: normal;
   font-weight: 500;
   font-display: swap;
-  src: url(/assets/figma147/fonts/font-1.ttf) format('truetype');
+  src: url(../public/assets/figma147/fonts/font-1.ttf) format('truetype');
 }
 @font-face {
   font-family: 'Outfit';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url(/assets/figma147/fonts/font-2.ttf) format('truetype');
+  src: url(../public/assets/figma147/fonts/font-2.ttf) format('truetype');
 }
 @font-face {
   font-family: 'Outfit';
   font-style: normal;
   font-weight: 500;
   font-display: swap;
-  src: url(/assets/figma147/fonts/font-3.ttf) format('truetype');
+  src: url(../public/assets/figma147/fonts/font-3.ttf) format('truetype');
 }
 @font-face {
   font-family: 'Outfit';
   font-style: normal;
   font-weight: 600;
   font-display: swap;
-  src: url(/assets/figma147/fonts/font-4.ttf) format('truetype');
+  src: url(../public/assets/figma147/fonts/font-4.ttf) format('truetype');
 }
 
 /* Figma Home 147:8019. Marketing surface + Arco DS overlay/text tokens. */
@@ -72,3 +72,29 @@ body{font-family:Inter,'PingFang SC','Microsoft YaHei',sans-serif;background:var
 @media(prefers-reduced-motion:reduce){.hero-pointer-glow{display:none}.hero-copy{will-change:auto}}
 
 fieldset.language-switch{border:0;padding:0;margin:0;min-width:0}
+/* Keep decorative hero fades behind all interactive foreground content. */
+.hero:after{z-index:-1}.hero{isolation:isolate}.hero .hero-stage,.hero .hero-scene{position:relative;z-index:1}.hero .hero-prompt{z-index:20;overflow:visible;padding:0;background:transparent;border:0;transform-style:flat}.hero-prompt .studio-composer{position:relative;inset:auto;width:100%;height:auto;min-height:114px;transform:none;font-size:12px}.hero-prompt .studio-composer>textarea{height:70px;padding:12px;width:100%}.hero-prompt .studio-composer-project{display:none}.arco-menu{width:220px;background:#1a1d22;color:#fff;border:1px solid #ffffff10;font-size:12px}.arco-menu [data-slot=dropdown-menu-item]{font-size:12px;min-height:32px}.arco-menu [data-slot=dropdown-menu-item]:hover{background:#ffffff0f}
+
+/* The design story owns its frame and caption; the D5 connection gallery keeps its layout. */
+.story-sticky{width:min(1440px,75vw);margin:auto;padding:130px 0}
+.story-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:24px}
+.story-controls{margin:0;flex:none;height:48px}
+.story-frame{position:relative;width:100%;aspect-ratio:1.8;overflow:hidden;border:1px solid rgba(255,255,255,.1);border-radius:24px;background:#111216;isolation:isolate}
+.story-scene{position:absolute;inset:0;padding:1.666667%;transform:translateY(calc((var(--scene-index) - var(--story-position,0))*100%));transition:transform 420ms cubic-bezier(.22,.68,0,1);will-change:transform}
+.story-scene{display:flex;align-items:center}.story-scene .studio-frame{flex:none}
+.story-caption{margin-top:24px;min-height:132px}
+.story-caption h3{font-size:24px;font-weight:500;line-height:48px;margin:0}
+.story-caption p{max-width:720px;color:#a1a1aa;font-size:20px;line-height:28px;margin:0}
+@media(min-width:901px) and (min-height:700px){.design-story{height:calc(100svh - 64px + (var(--count) - 1)*clamp(420px,72svh,800px))}.story-sticky{position:sticky;top:64px;height:calc(100svh - 64px);padding:24px 0;display:flex;flex-direction:column;justify-content:center;width:min(1440px,75vw,calc((100svh - 364px)*1.8))}.story-heading{margin-bottom:28px}.story-heading h2{font-size:34px;margin-bottom:16px}.story-heading p{font-size:16px;line-height:24px}.story-frame{flex:none}.story-caption{min-height:104px;margin-top:20px}.story-caption p{font-size:18px;line-height:28px}}
+@media(max-width:900px){.story-sticky{width:calc(100vw - 48px);padding:70px 0 45px}.story-heading{gap:12px}.story-controls{gap:0}.story-caption h3{font-size:22px;line-height:36px}.story-caption p{font-size:16px;line-height:26px}}
+@media(max-width:560px){.story-sticky{width:calc(100vw - 32px)}.story-heading h2{font-size:24px}.story-heading p{font-size:14px}.story-controls button{width:22px}.story-caption{min-height:140px}.story-frame{border-radius:12px}.story-scene{padding:8px}}
+@media(prefers-reduced-motion:reduce){.story-scene{transition:none;will-change:auto}}
+/* A 1:60 inset on every edge around the unchanged 1440:800 artboard. */
+.story-frame{aspect-ratio:135/77}
+@media(max-width:560px){.story-scene{padding:1.666667%}}
+
+/* Native scroll owns the transform: no second animation chasing an old page index. */
+.design-story[data-scroll-bound=true] .story-scene{transition:none}
+.design-story .studio-chat-scroll,.design-story .studio-document-scroll{overscroll-behavior-y:auto}
+
+#chat .story-frame:has(>.story-scene:first-child[aria-hidden=false]){background:transparent;border-color:transparent;border-radius:0}

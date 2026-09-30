@@ -2,18 +2,39 @@
 
 本地预览：http://localhost:3016/
 
-基于 Figma `P2CIw1nZRLhQLvFM07lnZY / 147:8019`，React 19 + Vinext。源码仓库：[kinkihi/d5-arco-landing](https://github.com/kinkihi/d5-arco-landing)。
-
-GitHub 仓库用于代码托管，尚未启用 GitHub Pages。之前的 Sites 版本已部署，但访问 chatgpt.site 时被平台防护返回 403，当前不作为可用的在线预览入口。
-
 ## 运行
 
 ```sh
-npm install
+npm ci
 npm run dev -- --host 127.0.0.1 --port 3016
 npm run build
 npx tsc --noEmit --incremental false
 ```
+
+需要 Node.js 22.13 或更高版本。Windows PowerShell 若禁止执行 npm.ps1，可将命令中的 `npm` / `npx` 换成 `npm.cmd` / `npx.cmd`。
+
+## GitHub 与在线预览
+
+- 网站：https://kinkihi.github.io/d5-arco-landing/
+- 公开源码：https://github.com/kinkihi/d5-arco-landing
+- 下载 ZIP：https://github.com/kinkihi/d5-arco-landing/archive/refs/heads/main.zip
+
+```sh
+git clone https://github.com/kinkihi/d5-arco-landing.git
+cd d5-arco-landing
+npm ci
+npm run build:pages
+```
+
+`main` 的每次推送通过 GitHub Actions 自动检查并发布到 GitHub Pages。
+静态产物位于 `dist/pages/`，包含首页和 `/share/garden/` 分享示例。
+`vite.pages.config.ts` 和 `pages/` 复用 `app/` 中的 React 界面，无需服务器。
+`lib/base-path.ts` 为图片与站内链接添加仓库子路径；CSS 资源由 Vite 处理。
+默认路径为 `/d5-arco-landing`，迁移仓库时更新工作流中的 `PAGES_BASE_PATH`。
+
+原有 `npm run dev` / `npm run build` 保留 Sites / Cloudflare 构建。
+`.gitignore` 排除依赖、构建产物及 `.env*`。
+`public/assets/` 随网站部署；`design-assets/originals/` 与 `image/` 仅保留在源码仓库中供下载。
 
 ## 当前实现
 
@@ -52,8 +73,10 @@ npx tsc --noEmit --incremental false
 
 ## 验证
 
-已通过生产构建、TypeScript、变更组件的代码检查、两种语言的组件渲染检查（包括英文无残留中文、原生表格/输入/勾选控件、无整屏截图引用）和本地 HTTP 访问检查。本轮未执行浏览器截图或端到端交互测试。
+可运行以下命令检查本地副本：
 
-## 图片素材
-
-`public/assets/` 使用为网页压缩过的 WebP / JPEG 素材；原始 PNG 保留在 `design-assets/originals/`，Figma 整体参考图位于 `image/`。原始参考素材不会随网页部署包对外提供。
+```sh
+npm run build
+npx tsc --noEmit --incremental false
+npm test
+```

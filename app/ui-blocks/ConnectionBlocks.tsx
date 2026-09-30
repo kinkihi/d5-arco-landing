@@ -1,19 +1,17 @@
 'use client';
+import { withBasePath } from '@/lib/base-path';
 /* oxlint-disable next/no-img-element -- Local Figma assets retain their native dimensions inside scaled artboards. */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import {useDemoTimeline} from '../useDemoTimeline';
 import {
-  Menu,
-  FileDown,
+  MousePointer2,
   MessageCircle,
   Sparkles,
   Lightbulb,
   Leaf,
-  Flame,
   Frame,
   Layers,
-  Globe,
   Camera,
-  Eye,
   Plus,
   ChevronDown,
   ChevronRight,
@@ -35,6 +33,7 @@ import {
 import { useLanguage } from '../Language';
 import {
   Artboard,
+  Icon,
   Sidebar,
   Header,
   Composer,
@@ -93,6 +92,8 @@ export function SceneList({
 }
 export function RenderBlock() {
   const { t } = useLanguage();
+  const demo=useDemoTimeline(4200);
+  useEffect(()=>{if(!demo.manual&&demo.elapsed>=2300)setConnected(true);},[demo.elapsed,demo.manual]);
   const [connected, setConnected] = useState(false),
     [ignored, setIgnored] = useState(false),
     [scene, setScene] = useState(-1),
@@ -111,15 +112,17 @@ export function RenderBlock() {
   return (
     <Artboard
       id="connection-render"
+      onInteraction={demo.takeOver}
       label={t('D5 Render 联动界面', 'D5 Render connection interface')}
     >
+      <div className="connection-arco-window">
       <Sidebar active="connections" />
       <section className="studio-render-chat">
         <Header
-          title={t('连接', 'Connection')}
+          title={t('连接项目', 'Connection Project')}
           onShare={() => setSharing(true)}
         />
-        {!ignored && (
+        {!ignored && !connected && (
           <div
             className="studio-connect-card"
             data-ui-block="connection-prompt"
@@ -136,7 +139,7 @@ export function RenderBlock() {
               )}
             </p>
             <div>
-              <Frame size={14} />
+              <Icon name="appwindow" fallback={Frame} size={14} />
               <span>{t('D5 Render 项目', 'D5 Render Project')}.drs</span>
               <button onClick={() => setIgnored(true)}>
                 {t('忽略', 'Ignore')}
@@ -158,38 +161,28 @@ export function RenderBlock() {
             {t('查看可关联项目', 'Show available project')}
           </button>
         )}
-        <Composer connection onSend={() => setConnected(true)} />
+        {connected&&<><div className="connection-quick"><header>{t('快捷引用','Quick reference')}<span><ChevronRight size={12}/><X size={12}/></span></header><div><button onClick={()=>setScene(0)}><strong>{t('捕获视口','Capture viewport')}</strong><small>{t('截取项目当前视角','Capture the current view')}</small><span><Icon name="camera" fallback={Camera} size={28}/></span></button><button onClick={()=>setShowScene(v=>!v)}><strong>{t('场景列表','Scene list')}</strong><small>{t('300 个 / 100 组','300 scenes / 100 groups')}</small><span><img src={withBasePath("/assets/quick-reference/imgEmpty.svg")} alt=""/></span></button></div></div><div className="connection-linked"><span><ChevronDown size={12}/>{t('关联中','Connected')}</span><div><Icon name="appwindow" fallback={Frame} size={14}/>{t('render 的项目名字','Render project')}.drs<MoreSymbol/></div></div></>}
+        <Composer showLinked={false} onSend={() => setConnected(true)} />
       </section>
+      </div>
+      {!demo.manual&&demo.active&&demo.elapsed<3000&&<DemoPointer figma x={lerp(660,760,demo.elapsed,500,2000)} y={lerp(500,398,demo.elapsed,500,2000)} visible={demo.elapsed>300} clicking={demo.elapsed>=2100&&demo.elapsed<2400}/>}
+      <div className="connection-preview-heading"><h3>{t('和 D5 Render 联动','Connect with D5 Render')}</h3><p>{t('连接正在进行的 D5 Render 项目，让设计与实时场景保持同步。','Connect your active D5 Render project and keep design in sync with the live scene.')}</p></div>
       <section className="studio-render-app" data-ui-block="render-workspace">
         <div className="studio-render-title">
-          <img src="/assets/brand.webp" alt="D5" />
+          <span className="render-brand"><img src={withBasePath("/assets/brand.webp")} alt="D5" /></span>
           {t('D5 Render 项目', 'D5 Render Project')}
-          {connected && (
-            <span className="studio-connected">
-              <Check size={12} />
-              {t('已关联', 'Connected')}
-            </span>
-          )}
         </div>
-        <div className="studio-render-toolbar">
-          <IconButton
-            icon={Menu}
-            label={t('显示场景列表', 'Toggle scenes')}
-            onClick={() => setShowScene(!showScene)}
-          />
-          <FileDown size={17} />
-          <MessageCircle size={17} />
-          <Sparkles size={17} />
-          <button onClick={() => setSearch(search ? '' : objects[0])}>
-            {t('素材', 'Assets')}
-          </button>
-          {[Lightbulb, Leaf, Flame, Frame, Layers].map((I, i) => (
-            <I key={i} size={18} />
-          ))}
+        <div className="studio-render-toolbar render-reference-toolbar">
+          <button aria-label={t('显示场景列表','Toggle scenes')} onClick={()=>setShowScene(!showScene)}><img src={withBasePath("/assets/arco-icons/menu.svg")} alt=""/></button>
+          <button aria-label={t('导入项目','Import project')} onClick={()=>setIgnored(false)}><img src={withBasePath("/assets/arco-icons/fileimport.svg")} alt=""/></button>
+          <button aria-label={t('评论','Comments')} onClick={()=>setSharing(true)}><Icon name="chat" fallback={MessageCircle} size={32}/></button>
+          <button className={`render-arco-button ${!demo.manual&&demo.elapsed>=1950&&demo.elapsed<2600?'is-demo-hover':''}`} aria-label={t('连接 Arco','Connect Arco')} aria-pressed={connected} onClick={()=>{setIgnored(false);setConnected(true);}}><img className="render-arco-native" src={withBasePath("/assets/arco-icons/chatstardoutone.svg")} alt=""/></button>
+          <div className="render-assets-group"><button onClick={()=>setSearch(search?'':objects[0])}>{t('素材','Assets')}</button><button aria-label={t('智能素材','Smart assets')} onClick={()=>setSearch(objects[0])}><img src={withBasePath("/assets/arco-icons/starshine3linear.svg")} alt=""/></button></div>
+          <button aria-label={t('定位场景','Locate scene')} onClick={()=>setScene(0)}><img src={withBasePath("/assets/arco-icons/studio.svg")} alt=""/></button>
         </div>
         {showScene && (
           <aside className="studio-render-sidebar">
-            <SceneList selected={scene} onSelect={setScene} />
+            <div className="render-reference-scenes"><header>{t('场景','Scene')}<span><button aria-label={t('添加场景','Add scene')} onClick={()=>setScene(0)}><img src={withBasePath("/assets/arco-icons/addscene.svg")} alt=""/></button><button aria-label={t('场景菜单','Scene menu')} onClick={()=>setShowScene(false)}><img src={withBasePath("/assets/arco-icons/more.svg")} alt=""/></button></span></header>{[0,1,2,3,4].map(i=><button key={i} className="render-reference-row" aria-pressed={scene===i} onClick={()=>setScene(i)}><span><img src={withBasePath("/assets/arco-icons/imageempty.svg")} alt=""/></span><span>{t('场景','Scene')} {i+1}</span><img className="render-scene-video" src={withBasePath("/assets/arco-icons/video.svg")} alt=""/></button>)}</div>
             <div className="studio-render-layer">
               <header>
                 {t('图层', 'Layer')}
@@ -236,22 +229,10 @@ export function RenderBlock() {
         )}
         <div
           className="studio-render-viewport"
-          style={{ left: showScene ? 240 : 0 }}
+          style={{ left: showScene ? 480 : 0 }}
           data-ui-block="render-viewport"
         >
-          <div className="studio-viewport-controls">
-            <span>
-              <Frame size={16} />
-              <Globe size={16} />
-            </span>
-            <span>
-              <Camera size={16} />
-              {t('相机', 'Camera')}
-              <ChevronDown size={12} />
-              <Eye size={16} />
-            </span>
-          </div>
-          <div className="studio-ground-grid" />
+          <div className="render-reference-controls"><span><button aria-label={t('坐标轴','Axis')} onClick={()=>setScene(-1)}><img src={withBasePath("/assets/arco-icons/axis.svg")} alt=""/><img className="render-control-chevron" src={withBasePath("/assets/arco-icons/chevrondown.svg")} alt=""/></button><button aria-label={t('世界坐标','World coordinates')} onClick={()=>setScene(-1)}><img src={withBasePath("/assets/arco-icons/axisworld.svg")} alt=""/></button></span><button aria-label={t('吸取材质','Pick material')} onClick={()=>setSelectedObject(0)}><img src={withBasePath("/assets/arco-icons/eyedropper.svg")} alt=""/></button></div>
           {scene >= 0 && (
             <span className="studio-viewport-label">
               {t('场景', 'Scene')} {scene + 1}
@@ -287,6 +268,7 @@ export function QuickReference({
   active: number;
 }) {
   const { t } = useLanguage();
+  const [visible,setVisible]=useState(true);
   const cards = [
     [
       t('场景列表', 'Scene list'),
@@ -297,18 +279,17 @@ export function QuickReference({
     [
       t('已有材质', 'Materials'),
       t('24 种', '24 materials'),
-      '/assets/materials.webp',
+      withBasePath("/assets/materials.webp"),
     ],
-    [t('已有素材', 'Assets'), t('39 种', '39 assets'), '/assets/chair.webp'],
+    [t('已有素材', 'Assets'), t('39 种', '39 assets'), withBasePath("/assets/chair.webp")],
   ];
+  if(!visible)return <button className="studio-quick-reopen" onClick={()=>setVisible(true)}>{t('快捷引用','Quick reference')}</button>;
   return (
     <div className="studio-quick-reference" data-ui-block="quick-reference">
       <header>
         {t('快捷引用', 'Quick reference')}
         <span>
-          <ArrowLeft size={14} />
-          <ArrowRight size={14} />
-          <X size={14} />
+          <IconButton icon={ChevronRight} label={t('上一项','Previous')} onClick={()=>onSelect((active+3)%4)}/><IconButton icon={ChevronRight} label={t('下一项','Next')} onClick={()=>onSelect((active+1)%4)}/><IconButton icon={X} name="close" label={t('收起快捷引用','Hide quick reference')} onClick={()=>setVisible(false)}/>
         </span>
       </header>
       <div>
@@ -320,13 +301,7 @@ export function QuickReference({
           >
             <strong>{title}</strong>
             <small>{count}</small>
-            {img ? (
-              <img src={img} alt={title || ''} />
-            ) : (
-              <span className="studio-resource-empty">
-                <ImageIcon size={26} />
-              </span>
-            )}
+            {i===2?<span className="quick-materials">{['imgImage','imgImage1','imgImage2','imgImage3'].map(name=><img key={name} src={`${withBasePath('/assets/')}quick-reference/${name}.png`} alt=""/>)}</span>:i===3?<span className="quick-chair"><img src={withBasePath("/assets/quick-reference/imgThumbnail.png")} alt={t('椅子素材','Chair asset')}/></span>:<span className="studio-resource-empty"><img src={withBasePath("/assets/quick-reference/imgEmpty.svg")} alt=""/></span>}
           </button>
         ))}
       </div>
@@ -337,14 +312,15 @@ export function ResourceBrowser({
   tab,
   onTab,
   onReference,
+  selectedRows=[],
 }: {
   tab: number;
   onTab: (n: number) => void;
   onReference: (n: number) => void;
+  selectedRows?:number[];
 }) {
   const { t } = useLanguage();
-  const [grid, setGrid] = useState(false),
-    [selected, setSelected] = useState(-1);
+  const [selected, setSelected] = useState(-1);
   const tabs = [
     t('场景列表', 'Scenes'),
     t('渲染队列', 'Renders'),
@@ -358,7 +334,6 @@ export function ResourceBrowser({
     >
       <header>
         <span>{t('画布', 'Canvas')}</span>
-        <span>{t('详情', 'Details')}</span>
         <strong>{t('项目', 'Project')}</strong>
       </header>
       <nav>
@@ -374,17 +349,12 @@ export function ResourceBrowser({
             {label}
           </button>
         ))}
-        <IconButton
-          icon={grid ? List : Grid2X2}
-          label={t('切换列表布局', 'Toggle list layout')}
-          onClick={() => setGrid(!grid)}
-        />
       </nav>
-      <div className={`studio-resource-rows ${grid ? 'is-grid' : ''}`}>
+      <div className="studio-resource-rows">
         {Array.from({ length: 7 }, (_, i) => {
           const name =
             tab === 0
-              ? `${t(i === 3 ? '场景组' : '场景列表', i === 3 ? 'Scene Group' : 'Scene')} ${i + 1}`
+              ? `${t(i === 3 || i === 6 ? '场景组' : '场景列表', i === 3 || i === 6 ? 'Scene Group' : 'Scene')} ${i===3?1:i===6?2:i<3?i+1:i}`
               : `${tabs[tab]} ${i + 1}`;
           return (
             <button
@@ -393,20 +363,20 @@ export function ResourceBrowser({
                 setSelected(i);
                 onReference(i);
               }}
-              aria-pressed={selected === i}
+              aria-pressed={selectedRows.includes(i)||selected === i}
             >
               {tab < 2 ? (
                 <Checker stack={i === 3 || i === 6} />
               ) : (
                 <img
                   src={
-                    tab === 2 ? '/assets/materials.webp' : '/assets/chair.webp'
+                    tab === 2 ? withBasePath("/assets/materials.webp") : withBasePath("/assets/chair.webp")
                   }
                   alt=""
                 />
               )}
               <span>{name}</span>
-              {selected === i ? (
+              {selectedRows.includes(i)||selected === i ? (
                 <Check size={16} />
               ) : i === 3 ? (
                 <ChevronRight size={16} />
@@ -420,13 +390,20 @@ export function ResourceBrowser({
 }
 export function ResourcesBlock() {
   const { t } = useLanguage();
+  const demo=useDemoTimeline(18000);
+  const [selectedRows,setSelectedRows]=useState<number[]>([]);
+  const sentence=t('请根据这三个场景，优化灯光氛围并统一材质风格。','Refine the lighting and unify the material palette across these three scenes.');
+  useEffect(()=>{if(demo.manual)return;const rows=demo.elapsed>=4900?[0,1,5]:demo.elapsed>=3300?[0,1]:demo.elapsed>=1800?[0]:[];setSelectedRows(previous=>previous.join(',')===rows.join(',')?previous:rows);},[demo.elapsed,demo.manual]);
+  const typed=sentence.slice(0,Math.max(0,Math.floor((demo.elapsed-5700)/70)));
+  const selectReference=(row:number)=>setSelectedRows(previous=>previous.includes(row)?previous:[...previous,row]);
+  const referenceNames=selectedRows.map(i=>`${t(i===3||i===6?'场景组':'场景列表',i===3||i===6?'Scene Group':'Scene')} ${i===3?1:i===6?2:i<3?i+1:i}`);
   const [tab, setTab] = useState(0),
-    [reference, setReference] = useState(0),
-    [linked, setLinked] = useState(true),
+    [linked, setLinked] = useState(false),
     [sharing, setSharing] = useState(false);
   return (
     <Artboard
       id="connection-resources"
+      onInteraction={demo.takeOver}
       label={t('云资源引用界面', 'Cloud resource interface')}
     >
       <Sidebar active="connections" />
@@ -437,9 +414,9 @@ export function ResourcesBlock() {
         />
         <QuickReference active={tab} onSelect={setTab} />
         <div className="studio-linked-project" data-ui-block="linked-project">
-          <button onClick={() => setLinked(!linked)}>
-            <ChevronDown size={12} />
-            {linked ? t('关联中', 'Connected') : t('已收起', 'Collapsed')}
+          <button onClick={() => setLinked(!linked)} aria-expanded={linked}>
+            <ChevronDown size={12} style={{transform:linked?undefined:'rotate(-90deg)'}} />
+            {t('关联中', 'Connected')}
           </button>
           {linked && (
             <div>
@@ -450,11 +427,14 @@ export function ResourcesBlock() {
           )}
         </div>
         <Composer
-          connection
-          reference={`${t('资源', 'Resource')} ${reference + 1}`}
+          showLinked={false}
+          references={referenceNames}
+          onRemoveReference={index=>setSelectedRows(rows=>rows.filter((_,i)=>i!==index))}
+          demoText={demo.manual?undefined:typed}
         />
       </section>
-      <ResourceBrowser tab={tab} onTab={setTab} onReference={setReference} />
+      <ResourceBrowser tab={tab} onTab={setTab} onReference={selectReference} selectedRows={selectedRows}/>
+      {!demo.manual&&demo.active&&demo.elapsed<6100&&<DemoPointer x={demo.elapsed<1200?lerp(1050,1215,demo.elapsed,300,1200):demo.elapsed<5100?1215:lerp(1215,450,demo.elapsed,5100,5700)} y={demo.elapsed<2000?lerp(220,146,demo.elapsed,300,1400):demo.elapsed<3600?lerp(146,246,demo.elapsed,2200,3000):demo.elapsed<5100?lerp(246,646,demo.elapsed,3600,4500):lerp(646,670,demo.elapsed,5100,5700)} visible={demo.elapsed>300} clicking={[1800,3300,4900].some(time=>demo.elapsed>=time-100&&demo.elapsed<time+180)}/>}
       {sharing && <Sharing onClose={() => setSharing(false)} />}
     </Artboard>
   );
@@ -645,45 +625,7 @@ export function TransferBlock() {
               setStarted(false);
             }}
           />
-          <div
-            className="studio-transfer-composer"
-            data-ui-block="transfer-composer"
-          >
-            <div>
-              <img src="/assets/skill-storyboard.webp" alt="" />
-              {reference >= 0 && (
-                <span>
-                  {t('资源', 'Asset')} {reference + 1}
-                </span>
-              )}
-              <Bookmark size={16} />
-            </div>
-            <textarea
-              aria-label={t('迁移说明', 'Transfer instructions')}
-              placeholder={t('补充迁移说明…', 'Add transfer instructions…')}
-            />
-            <footer>
-              <SlidersHorizontal size={16} />
-              <Sparkles size={16} />
-              <Bookmark size={16} />
-              <button
-                className="studio-ai-button"
-                disabled={!checked.some(Boolean)}
-                onClick={() => setStarted(true)}
-                aria-label={t('预览迁移任务', 'Preview transfer tasks')}
-              >
-                <ArrowUp size={18} />
-              </button>
-            </footer>
-            {started && (
-              <small>
-                {t(
-                  `已选择 ${checked.filter(Boolean).length} 项，本地预览未修改 Render 项目。`,
-                  `${checked.filter(Boolean).length} tasks selected. This local preview does not modify a Render project.`,
-                )}
-              </small>
-            )}
-          </div>
+          <div className="studio-transfer-composer"><Composer showFooter={false} reference={reference>=0?`${t('资源','Asset')} ${reference+1}`:undefined} onSend={()=>setStarted(true)}/>{started&&<small role="status">{t(`已选择 ${checked.filter(Boolean).length} 项，本次为迁移演示。`,`${checked.filter(Boolean).length} tasks selected for this transfer demo.`)}</small>}</div>
         </div>
         <CanvasFooter zoom={zoom} onZoom={setZoom} />
       </section>
@@ -691,3 +633,6 @@ export function TransferBlock() {
     </Artboard>
   );
 }
+
+function lerp(from:number,to:number,time:number,start:number,end:number){const p=Math.max(0,Math.min(1,(time-start)/(end-start)));return from+(to-from)*p*p*(3-2*p);}
+function DemoPointer({x,y,visible,clicking,size=30,figma=false}:{x:number;y:number;visible:boolean;clicking:boolean;size?:number;figma?:boolean}){return <span className={`connection-demo-pointer ${figma?'is-figma-pointer':''} ${clicking?'is-clicking':''}`} aria-hidden="true" style={{left:x,top:y,opacity:visible?1:0}}>{figma?<img src={withBasePath("/assets/arco-icons/demo-pointer.svg")} alt=""/>:<MousePointer2 size={size} fill="#b38bff" stroke="#9459ff"/>}<i/></span>;}

@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
+import {DemoResetBoundary} from './ui-blocks/Primitives';
 import { useLanguage } from './Language';
 export function DesignGallery({
   id,
@@ -114,7 +115,7 @@ export function DesignGallery({
           <div className="gallery-track" ref={track}>
             {panels.map((im, i) => (
               <figure key={im.id} aria-label={im.label} inert={i !== active}>
-                {im.content}
+                <DemoResetBoundary>{im.content}</DemoResetBoundary>
               </figure>
             ))}
           </div>
